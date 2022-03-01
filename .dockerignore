@@ -1,0 +1,10 @@
+# comment
+.clinic
+.vscode
+.idea
+.husky
+node_modules
+spec
+dist
+.env
+.env.*
