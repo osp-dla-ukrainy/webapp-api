@@ -4,6 +4,8 @@ const {dockerLogin} = require("./docker-login.js");
 
 await dockerLogin();
 
-await $`docker-compose build api`;
+const service = process.env.SERVICE;
 
-await $`docker-compose push api`;
+await $`docker-compose build ${service}`;
+
+await $`docker-compose push ${service}`;
