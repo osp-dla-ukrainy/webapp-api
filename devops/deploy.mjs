@@ -2,6 +2,7 @@
 
 const sshKey = process.env.SSH_KEY;
 const serverConnectionString = process.env.SERVER_CONNECTION_STRING;
+const service = process.env.SERVICE;
 
 await $`ssh-add - <<< ${sshKey}`
-await $`ssh -A ${serverConnectionString} git pull && docker-compose pull api && docker-compose up -d api`
+await $`ssh -A ${serverConnectionString} cd osp/webapp-api && git pull && docker-compose pull ${service} && docker-compose up -d ${service}`
