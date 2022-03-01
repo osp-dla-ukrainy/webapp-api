@@ -24,13 +24,12 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - name: Configuration
-        run: npm i -g zx
+      - run: npm i -g zx
       - name: Build
         run: |
-          chmod +x devops/docker-build-and-push.sh
-          sh devops/docker-build-and-push.sh
+          chmod +x devops/docker-build-and-push.mjs
+          zx devops/docker-build-and-push.mjs
       - name: Deploy
         run: |
-          chmod +x devops/deploy.sh
-          sh devops/deploy.sh
+          chmod +x devops/deploy.mjs
+          zx devops/deploy.mjs
