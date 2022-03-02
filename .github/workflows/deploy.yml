@@ -40,4 +40,4 @@ jobs:
           host: ${{ secrets.SERVER_ADDRESS }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          script: cd osp/webapp-api && git pull && docker-compose pull ${{ env.SERVICE }} && docker-compose up -d ${{ env.SERVICE }}
+          script: cd osp/infra && git pull && make deploy
