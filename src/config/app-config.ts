@@ -9,13 +9,13 @@ export class AppConfig {
         port: Number(process.env.PORT),
       },
       database: {
-        host: process.env.DATBASE_HOST,
-        port: Number(process.env.DATBASE_PORT) || 3000,
-        user: process.env.DATBASE_USERNAME,
-        password: process.env.DATBASE_PASSWORD,
-        name: process.env.DATBASE_NAME,
+        host: process.env.DATABASE_HOST,
+        port: Number(process.env.DATABASE_PORT) || 3000,
+        user: process.env.DATABASE_USERNAME,
+        password: process.env.DATABASE_PASSWORD,
+        name: process.env.DATABASE_NAME,
       },
-    })
+    });
   }
 
   readonly app: {
@@ -27,7 +27,7 @@ export class AppConfig {
     readonly password: string;
     readonly user: string;
     readonly name: string;
-  }
+  };
 
   constructor(partial: Partial<AppConfig>) {
     Object.assign(this, partial);
