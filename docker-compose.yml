@@ -1,8 +1,13 @@
 version: '3.8'
 
+volumes:
+  pg_data:
+
 services:
   db:
     image: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
@@ -10,9 +15,17 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: webapi
   api:
-    image: pantyporowicz/osp-webapp-api:latest
     build: .
     ports:
       - "3000:3000"
+      - "9229:9229"
+    volumes:
+      - .:/usr/src/app
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: webapi
     command:
-      npm run start
+      npm run start:dev

@@ -1,8 +1,12 @@
 import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import { getAuthController } from './identity/ui/auth.controller';
 
 const routes = Router();
 
-routes.get('/health', (req, res) => res.status(StatusCodes.OK).json({ status: 'ok' }));
+const identityRoues = Router();
+
+identityRoues.use('/auth', getAuthController());
+
+routes.use('/identity', identityRoues);
 
 export default routes;
