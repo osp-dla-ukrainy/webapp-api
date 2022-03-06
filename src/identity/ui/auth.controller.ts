@@ -17,7 +17,7 @@ export class AuthController {
   }
 }
 
-export function getAuthController() {
+export function getAuthRoutes() {
   const router = Router();
 
   router.get('/facebook/callback', query('code').isString(), validationMiddleware, AuthController.facebookAuth);

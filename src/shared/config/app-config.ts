@@ -2,11 +2,20 @@ import { config as dotenvConfig } from 'dotenv';
 
 dotenvConfig();
 
+export enum AppEnv {
+  Dev = 'dev',
+  Staging = 'staging',
+  Production = 'production',
+}
+
 export class AppConfig {
   static load() {
     const frontendBaseUrl = process.env.FRONTEND_BASE_URL;
 
     return new AppConfig({
+      sentry: {
+        dsn: process.env.SENTRY_DSN,
+      },
       frontendApp: {
         baseUrl: frontendBaseUrl,
         loginPages: {
@@ -20,6 +29,7 @@ export class AppConfig {
       },
       app: {
         port: Number(process.env.PORT),
+        env: process.env.NODE_ENV.toLowerCase() as AppEnv,
       },
       database: {
         host: process.env.DATABASE_HOST,
@@ -40,6 +50,9 @@ export class AppConfig {
     });
   }
 
+  readonly sentry: {
+    readonly dsn: string;
+  };
   readonly frontendApp: {
     readonly baseUrl: string;
     readonly loginPages: {
@@ -57,6 +70,7 @@ export class AppConfig {
   };
   readonly app: {
     readonly port: number;
+    readonly env: AppEnv;
   };
   readonly database: {
     readonly host: string;
