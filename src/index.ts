@@ -1,35 +1,32 @@
 import 'reflect-metadata';
 import express from 'express';
-import { createConnection } from 'typeorm';
-import { bootstrapAdmin } from './config/admin-config';
-import { AppConfig } from './config/app-config';
-import { Person } from './entities/person';
+import 'express-async-errors';
+import { StatusCodes } from 'http-status-codes';
+import { createConnections } from 'typeorm';
+import container from './ioc/container';
 import Routes from './routes';
-import { Container } from './config/ioc';
+import { bootstrapAdmin } from './shared/admin/admin-config';
+import { AppConfig } from './shared/config/app-config';
+import connectionOptions from './shared/database/database-config';
+import { exceptionHandlerMiddleware } from './shared/exception/exception-handler-middleware';
+import { Logger } from './shared/logger';
 
-const container = Container.getInstance();
 const config = container.get(AppConfig);
+const logger = container.get(Logger);
 
 const app = express();
 
 app.set('trust proxy', 1);
 
-createConnection({
-  type: 'postgres',
-  host: config.database.host,
-  database: config.database.name,
-  username: config.database.user,
-  password: config.database.password,
-  port: config.database.port,
-  entities: [Person],
-  synchronize: true,
-}).then((connection) => {
-  const { adminJs, adminRouter } = bootstrapAdmin(connection);
+createConnections(connectionOptions).then((connections) => {
+  const { adminJs, adminRouter } = bootstrapAdmin(connections);
 
   app.use(adminJs.options.rootPath, adminRouter);
-  app.use(Routes);
+  app.get('/health', (req, res) => res.status(StatusCodes.OK).json({ status: 'ok' }));
+  app.use('/api', Routes);
+  app.use(exceptionHandlerMiddleware({ logger }));
 
   app.listen(config.app.port, () => {
-    console.log('app listening on 3000 port');
+    logger.log('app listening on 3000 port');
   });
 });
