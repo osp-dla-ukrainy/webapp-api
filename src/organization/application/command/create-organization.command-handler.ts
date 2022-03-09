@@ -1,0 +1,51 @@
+import { injectable } from 'inversify';
+import { CommandHandler } from '../../../shared/events/command-handler';
+import { EventPublisher } from '../../../shared/events/event-publisher';
+import { Organization } from '../../domain/entity/organization';
+import { OrganizationException } from '../../domain/exception/organization-exception';
+import { ParticipantException } from '../../domain/exception/participant-exception';
+import { OrganizationRepository } from '../../domain/repository/organization.repository';
+import { ParticipantRepository } from '../../domain/repository/participant-repository';
+import { OrganizationId } from '../../domain/value-object/organization-id';
+import { OrganizationType } from '../../domain/value-object/organization-type';
+import { ParticipantId } from '../../domain/value-object/participant-id';
+
+export class CreateOrganizationCommand {
+  readonly organizationId: OrganizationId;
+  readonly participantId: ParticipantId;
+  readonly type: OrganizationType;
+}
+
+@injectable()
+export class CreateOrganizationCommandHandler implements CommandHandler<CreateOrganizationCommand> {
+  constructor(
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly eventPublisher: EventPublisher,
+    private readonly participantRepository: ParticipantRepository
+  ) {}
+
+  async execute({ organizationId, type, participantId }: CreateOrganizationCommand): Promise<void> {
+    const participant = await this.participantRepository.findOne(participantId);
+
+    if (!participant) {
+      throw ParticipantException.createDoesNotFound();
+    }
+
+    const organization = await this.organizationRepository.findOneByOwner(participant.id);
+
+    if (organization) {
+      throw OrganizationException.createParticipantHasAlreadyOrganization();
+    }
+
+    const newOrganization = Organization.create({
+      organizationId,
+      type,
+      owner: participant,
+    });
+
+    this.eventPublisher.mergeContext(newOrganization);
+
+    await this.organizationRepository.save(newOrganization);
+    await newOrganization.commit();
+  }
+}

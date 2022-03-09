@@ -27,5 +27,15 @@ services:
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: root
       DATABASE_NAME: webapi
+      RABBIT_HOST: rabbit
     command:
-      npm run start:dev
+      node start-dev.js
+  rabbit:
+    image: rabbitmq:3.9-management
+    ports:
+      - "15671:15671"
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password

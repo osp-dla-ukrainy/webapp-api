@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { matchedData, query } from 'express-validator';
 import { injectable } from 'inversify';
-import { container } from '../../ioc/container';
+import container from '../../container';
 import { validationMiddleware } from '../../shared/validation/validation-middleware';
 import { FacebookAuthService } from '../application/facebook-auth.service';
 

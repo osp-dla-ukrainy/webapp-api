@@ -6,7 +6,7 @@ export class AuthException extends HttpException {
     return new AuthException({
       message: `Authorization failed`,
       status: StatusCodes.UNAUTHORIZED,
-      previousException: partial.previousException,
+      previousException: partial?.previousException,
     });
   }
 

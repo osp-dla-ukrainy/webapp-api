@@ -1,20 +1,22 @@
 import { injectable } from 'inversify';
 import { Jwt, JwtUser } from '../../shared/auth/jwt';
-import { AppConfig } from '../../shared/config/app-config';
+import { Config } from '../../shared/config/config';
 import { AuthException } from '../../shared/exception/auth.exception';
 import { Logger } from '../../shared/logger';
 import { User } from '../domain/entity/user';
 import { UserRepository } from '../domain/repository/user.repository';
 import { FacebookApiService } from '../domain/service/facebook-api.service';
 import { FacebookTypes } from '../domain/service/facebook.types';
+import { OrganizationService } from '../domain/service/organization.service';
 
 @injectable()
 export class FacebookAuthService {
   constructor(
     private readonly facebookApiService: FacebookApiService,
     private readonly userRepository: UserRepository,
-    private readonly config: AppConfig,
-    private readonly logger: Logger
+    private readonly config: Config,
+    private readonly logger: Logger,
+    private readonly organizationService: OrganizationService
   ) {}
 
   async login({ facebookAuthCode }: { facebookAuthCode: string }): Promise<{ redirectUrl: URL }> {
@@ -46,6 +48,7 @@ export class FacebookAuthService {
 
     const newUser = User.createUserFromFacebookAuth(userData);
 
+    await this.organizationService.createOwner({ userId: newUser.id });
     await this.userRepository.save(newUser);
 
     return newUser;

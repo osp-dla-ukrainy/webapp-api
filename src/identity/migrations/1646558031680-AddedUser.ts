@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+/* eslint-disable max-len */
 export class AddedUser1646558031680 implements MigrationInterface {
   name = 'AddedUser1646558031680';
 
