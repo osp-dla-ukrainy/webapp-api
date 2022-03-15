@@ -7,7 +7,7 @@ import { ParticipantId } from '../value-object/participant-id';
 @Unique(['userId'])
 @Entity()
 export class Participant extends RootAggregate {
-  static create({ id, userId }: { userId: string; id: ParticipantId }): Participant {
+  static createEntity({ id, userId }: { userId: string; id: ParticipantId }): Participant {
     const owner = new Participant({
       id,
       userId,

@@ -170,8 +170,10 @@ export class Config {
 
     if (errors.length) {
       throw new HttpException({
-        details: ClassValidatorExceptionMapper.map(errors),
-        message: 'Missing configuration',
+        details: {
+          message: 'Wrong app configuration',
+          errors: ClassValidatorExceptionMapper.map(errors),
+        },
         status: StatusCodes.UNPROCESSABLE_ENTITY,
       });
     }

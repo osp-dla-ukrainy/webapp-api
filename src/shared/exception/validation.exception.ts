@@ -8,16 +8,20 @@ export class ValidationException extends HttpException {
   static createRequestValidationException(errors: ExpressValidatorError[]) {
     return new ValidationException({
       status: StatusCodes.BAD_REQUEST,
-      message: 'Request validation failed',
-      details: errors,
+      details: {
+        message: 'Request validation failed',
+        errors,
+      },
     });
   }
 
   static createEntityValidationException(errors: ClassValidatorError[]) {
     return new ValidationException({
       status: StatusCodes.BAD_REQUEST,
-      message: 'Request validation failed',
-      details: ClassValidatorExceptionMapper.map(errors),
+      details: {
+        message: 'Request validation failed',
+        errors: ClassValidatorExceptionMapper.map(errors),
+      },
     });
   }
 

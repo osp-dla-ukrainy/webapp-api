@@ -1,8 +1,8 @@
-import { Column, CreateDateColumn, Entity, Generated, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, Generated, PrimaryGeneratedColumn } from 'typeorm';
 import { DomainEvent } from '../../../shared/events/domain-event';
 
 @Entity()
-export class EventStore<TData extends DomainEvent> {
+export class EventStore<TData extends DomainEvent> extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
@@ -23,6 +23,7 @@ export class EventStore<TData extends DomainEvent> {
   readonly createdAt: Date;
 
   constructor(partial: Partial<EventStore<TData>>) {
+    super();
     Object.assign(this, partial);
   }
 }

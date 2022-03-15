@@ -9,7 +9,7 @@ import { Participant } from './participant';
 
 @Entity()
 export class Organization extends RootAggregate {
-  static create({ organizationId, owner }: { organizationId: OrganizationId; owner: Participant }): Organization {
+  static createEntity({ organizationId, owner }: { organizationId: OrganizationId; owner: Participant }): Organization {
     const organization = new Organization({
       id: organizationId,
       owner,
