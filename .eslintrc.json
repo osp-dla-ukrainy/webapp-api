@@ -6,6 +6,9 @@
     "jest": true
   },
   "rules": {
+    "no-constant-condition": ["off"],
+    "func-names": ["off"],
+    "no-param-reassign": ["off"],
     "no-restricted-syntax": ["error", "For"],
     "no-await-in-loop": ["off"],
     "max-classes-per-file": ["off"],

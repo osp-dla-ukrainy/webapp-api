@@ -11,10 +11,10 @@ export abstract class Logger {
 @injectable()
 export class ConsoleLogLogger extends Logger {
   error(message: string): void {
-    console.log(chalk.green(message));
+    console.log(chalk.red(message));
   }
 
   log(message: string): void {
-    console.error(chalk.red(message));
+    console.error(chalk.green(message));
   }
 }

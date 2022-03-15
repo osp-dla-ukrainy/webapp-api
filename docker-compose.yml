@@ -27,5 +27,6 @@ services:
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: root
       DATABASE_NAME: webapi
+      RABBIT_HOST: rabbit
     command:
       npm run start:dev

@@ -5,8 +5,8 @@ import { Router } from 'express';
 import session from 'express-session';
 import { Connection } from 'typeorm';
 import { v4 } from 'uuid';
-import { container } from '../../ioc/container';
-import { AppConfig } from '../config/app-config';
+import container from '../../container';
+import { Config } from '../config/config';
 import {
   IdentityConnectionName,
   IdentityEntities,
@@ -15,7 +15,7 @@ import {
 const AdminJS = require('adminjs');
 
 export function bootstrapAdmin(connections: Connection[]) {
-  const config = container.get(AppConfig);
+  const config = container.get(Config);
 
   Resource.validate = validate;
   AdminJS.registerAdapter({
@@ -28,7 +28,7 @@ export function bootstrapAdmin(connections: Connection[]) {
   IdentityEntities.forEach((entity) => entity.useConnection(identityDbConnection));
 
   const adminJs = new AdminJS({
-    databases: connections,
+    databases: [identityDbConnection],
     resources: [],
     rootPath: '/admin',
   });

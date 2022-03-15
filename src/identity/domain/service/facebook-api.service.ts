@@ -1,11 +1,11 @@
 import { injectable } from 'inversify';
-import { AppConfig } from '../../../shared/config/app-config';
+import { Config } from '../../../shared/config/config';
 import { HttpClient, HttpMethod } from '../../../shared/http-client/http-client';
 import { FacebookTypes } from './facebook.types';
 
 @injectable()
 export class FacebookApiService {
-  constructor(private readonly httpClient: HttpClient, private readonly appConfig: AppConfig) {}
+  constructor(private readonly httpClient: HttpClient, private readonly appConfig: Config) {}
 
   async createAccessToken({ code }: { code: string }): Promise<FacebookTypes.OAuthAccessTokenResponse> {
     const { data } = await this.httpClient.sendRequest<{ access_token: string }>({

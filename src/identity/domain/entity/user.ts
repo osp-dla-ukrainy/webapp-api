@@ -1,5 +1,6 @@
 import { IsEmail, IsString, validate, ValidateNested } from 'class-validator';
 import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { v4 } from 'uuid';
 import { validateEntity } from '../../../shared/validation/validate-entity';
 import { FacebookTypes } from '../service/facebook.types';
 import { FacebookProfile } from './facebook-profile';
@@ -11,6 +12,7 @@ import { FacebookProfile } from './facebook-profile';
 export class User extends BaseEntity {
   static createUserFromFacebookAuth(userData: FacebookTypes.UserDataResponse) {
     return new User({
+      id: v4(),
       facebookProfile: new FacebookProfile({
         facebookId: userData.id,
       }),
