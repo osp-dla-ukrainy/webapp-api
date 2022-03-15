@@ -19,7 +19,7 @@ export class EventPublisher {
     }
   }
 
-  async handle(event: DomainEvent<any>) {
+  async handle(event: DomainEvent) {
     const handlers = this.eventHandlers.get(event.constructor.name) ?? [];
     const allHandlers = [...handlers, ...this.globalEventHandlers];
 

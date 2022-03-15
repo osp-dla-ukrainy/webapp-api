@@ -8,7 +8,11 @@ export class OrganizationId implements Id {
 
   constructor(private readonly _id: string) {}
 
-  get id(): string {
+  get valueOf(): string {
     return this._id;
+  }
+
+  toString() {
+    return this.valueOf;
   }
 }

@@ -1,32 +1,36 @@
-import { Type } from 'class-transformer';
+import { Column, Entity, PrimaryColumn, Unique } from 'typeorm';
+import { IdValueTransformer } from '../../../shared/database/value-transformer/id.value-transformer';
 import { RootAggregate } from '../../../shared/events/root-aggregate';
 import { ParticipantCreated } from '../event/participant-created';
 import { ParticipantId } from '../value-object/participant-id';
 
-export class ParticipantCurrentState {
-  userId: string;
-}
-
-export class Participant extends RootAggregate<ParticipantCurrentState> {
+@Unique(['userId'])
+@Entity()
+export class Participant extends RootAggregate {
   static create({ id, userId }: { userId: string; id: ParticipantId }): Participant {
     const owner = new Participant({
       id,
+      userId,
     });
 
     owner.apply(
       new ParticipantCreated({
-        userId,
-        participantId: id,
+        userId: owner.userId,
+        participantId: owner.id,
       })
     );
 
     return owner;
   }
 
-  @Type(() => Participant)
+  @PrimaryColumn('uuid', {
+    name: 'participant_id',
+    transformer: new IdValueTransformer(ParticipantId),
+  })
   id: ParticipantId;
-  @Type(() => ParticipantCurrentState)
-  currentState: ParticipantCurrentState = new ParticipantCurrentState();
+
+  @Column('uuid')
+  userId: string;
 
   constructor(partial: Partial<Participant>) {
     super();

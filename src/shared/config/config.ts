@@ -8,6 +8,7 @@ import { ClassValidatorExceptionMapper } from '../validation/class-validator.exc
 dotenvConfig();
 
 export enum AppEnv {
+  Test = 'test',
   Dev = 'dev',
   Staging = 'staging',
   Production = 'production',
@@ -62,8 +63,6 @@ class DatabaseConfig {
   readonly password: string;
   @IsString()
   readonly user: string;
-  @IsString()
-  readonly name: string;
 }
 
 class FacebookConfig {
@@ -112,7 +111,6 @@ export class Config {
         port: Number(process.env.DATABASE_PORT),
         user: process.env.DATABASE_USERNAME,
         password: process.env.DATABASE_PASSWORD,
-        name: process.env.DATABASE_NAME,
       },
       facebook: {
         clientId: Number(process.env.FACEBOOK_CLIENT_ID),

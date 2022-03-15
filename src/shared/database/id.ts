@@ -1,5 +1,6 @@
 export interface Id<TValue = string> {
-  get id(): TValue;
+  get valueOf(): TValue;
+  toString(): string | number;
 }
 
 export type IdConstructorType<TValue = string> = {

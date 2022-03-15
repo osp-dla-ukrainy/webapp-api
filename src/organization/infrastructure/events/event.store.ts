@@ -2,14 +2,9 @@ import { Column, CreateDateColumn, Entity, Generated, PrimaryGeneratedColumn } f
 import { DomainEvent } from '../../../shared/events/domain-event';
 
 @Entity()
-export class EventStore<TData extends DomainEvent<any>> {
+export class EventStore<TData extends DomainEvent> {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
-
-  @Column({
-    type: 'uuid',
-  })
-  readonly entityId: string;
 
   @Column()
   readonly type: string;

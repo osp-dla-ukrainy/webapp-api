@@ -1,21 +1,22 @@
 import { injectable } from 'inversify';
+import { Command } from '../../../shared/events/command';
 import { CommandHandler } from '../../../shared/events/command-handler';
+import { RegisterCommandHandler } from '../../../shared/events/command-handler.decorator';
 import { EventPublisher } from '../../../shared/events/event-publisher';
 import { Organization } from '../../domain/entity/organization';
 import { OrganizationException } from '../../domain/exception/organization-exception';
 import { ParticipantException } from '../../domain/exception/participant-exception';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
-import { ParticipantRepository } from '../../domain/repository/participant-repository';
+import { ParticipantRepository } from '../../domain/repository/participant.repository';
 import { OrganizationId } from '../../domain/value-object/organization-id';
-import { OrganizationType } from '../../domain/value-object/organization-type';
 import { ParticipantId } from '../../domain/value-object/participant-id';
 
-export class CreateOrganizationCommand {
+export class CreateOrganizationCommand extends Command<CreateOrganizationCommand> {
   readonly organizationId: OrganizationId;
   readonly participantId: ParticipantId;
-  readonly type: OrganizationType;
 }
 
+@RegisterCommandHandler(CreateOrganizationCommand)
 @injectable()
 export class CreateOrganizationCommandHandler implements CommandHandler<CreateOrganizationCommand> {
   constructor(
@@ -24,7 +25,7 @@ export class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
     private readonly participantRepository: ParticipantRepository
   ) {}
 
-  async execute({ organizationId, type, participantId }: CreateOrganizationCommand): Promise<void> {
+  async execute({ organizationId, participantId }: CreateOrganizationCommand): Promise<void> {
     const participant = await this.participantRepository.findOne(participantId);
 
     if (!participant) {
@@ -39,7 +40,6 @@ export class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
 
     const newOrganization = Organization.create({
       organizationId,
-      type,
       owner: participant,
     });
 

@@ -8,7 +8,11 @@ export class ParticipantId implements Id {
 
   constructor(private readonly _id: string) {}
 
-  get id(): string {
+  get valueOf(): string {
     return this._id;
+  }
+
+  toString(): string | number {
+    return this.valueOf;
   }
 }

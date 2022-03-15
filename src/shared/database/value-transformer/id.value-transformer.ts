@@ -5,7 +5,7 @@ export class IdValueTransformer<TValue> implements ValueTransformer {
   constructor(private readonly IdType: IdConstructorType<TValue>) {}
 
   to(value: Id<TValue>): TValue {
-    return value.id;
+    return value.valueOf;
   }
 
   from(value: any): Id<TValue> {

@@ -3,7 +3,7 @@ import { CommandHandler } from '../../../shared/events/command-handler';
 import { EventPublisher } from '../../../shared/events/event-publisher';
 import { ParticipantId } from '../../domain/value-object/participant-id';
 import { Participant } from '../../domain/entity/participant';
-import { ParticipantRepository } from '../../domain/repository/participant-repository';
+import { ParticipantRepository } from '../../domain/repository/participant.repository';
 
 export class CreateParticipantCommand {
   constructor(readonly userId: string, readonly participantId: ParticipantId) {}
@@ -12,7 +12,7 @@ export class CreateParticipantCommand {
 @injectable()
 export class CreateParticipantCommandHandler implements CommandHandler<CreateParticipantCommand> {
   constructor(
-    private readonly ownerRepository: ParticipantRepository,
+    private readonly participantRepository: ParticipantRepository,
     private readonly eventPublisher: EventPublisher
   ) {}
 
@@ -24,7 +24,7 @@ export class CreateParticipantCommandHandler implements CommandHandler<CreatePar
 
     this.eventPublisher.mergeContext(newOwner);
 
-    await this.ownerRepository.save(newOwner);
+    await this.participantRepository.save(newOwner);
     await newOwner.commit();
   }
 }

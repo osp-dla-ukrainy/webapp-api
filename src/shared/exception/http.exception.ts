@@ -14,7 +14,6 @@ export class HttpException extends Error {
 
   constructor({ details, message, status, previousException }: HttpExceptionConstructor) {
     super(message);
-    console.log(details);
     this.details = details;
     this.status = status;
     this.previousException = previousException;

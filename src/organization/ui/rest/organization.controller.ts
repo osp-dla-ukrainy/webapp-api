@@ -2,27 +2,28 @@ import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import container from '../../../container';
 import { AuthMiddleware } from '../../../shared/auth/auth-middleware';
-import { CreateOrganizationCommandHandler } from '../../application/command/create-organization.command-handler';
+import { CommandBus } from '../../../shared/events/command-bus';
+import { CreateOrganizationCommand } from '../../application/command/create-organization.command-handler';
 import { Participant } from '../../domain/entity/participant';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
 import { OrganizationId } from '../../domain/value-object/organization-id';
-import { OrganizationType } from '../../domain/value-object/organization-type';
 import { ResolveParticipant } from '../../infrastructure/auth/resolve-participant';
 
 export class OrganizationController {
   static async create(req: Request, res: Response) {
     const { participant } = res.locals as { participant: Participant };
-    const commandHandler = container.get(CreateOrganizationCommandHandler);
+    const commandBus = container.get(CommandBus);
 
     const organizationId = OrganizationId.create();
 
-    await commandHandler.execute({
-      organizationId,
-      type: OrganizationType.Ordinary,
-      participantId: participant.id,
-    });
+    await commandBus.handle(
+      new CreateOrganizationCommand({
+        organizationId,
+        participantId: participant.id,
+      })
+    );
 
-    return res.status(StatusCodes.CREATED).json({ organizationId: organizationId.id }).end();
+    return res.status(StatusCodes.CREATED).json({ organizationId: organizationId.valueOf }).end();
   }
 
   // todo create query-handler

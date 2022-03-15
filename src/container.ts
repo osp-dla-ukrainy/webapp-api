@@ -5,28 +5,29 @@ import { FacebookApiService } from './identity/domain/service/facebook-api.servi
 import { InternalOrganizationService, OrganizationService } from './identity/domain/service/organization.service';
 import { TypeOrmUserRepository } from './identity/infrastructure/repository/type-orm.user.repository';
 import { AuthController } from './identity/ui/auth.controller';
-import { EventPublishedQueueInjectToken, EventPubSubQueueInjectToken } from './inject-tokens';
 import { CreateOrganizationCommandHandler } from './organization/application/command/create-organization.command-handler';
 import { CreateParticipantCommandHandler } from './organization/application/command/create-participant.command-handler';
-import { PublishEventToQueueHandler } from './organization/domain/event-handler/publish-event-to-queue.handler';
 import { OrganizationRepository } from './organization/domain/repository/organization.repository';
-import { ParticipantRepository } from './organization/domain/repository/participant-repository';
-import { SentEventRepository } from './organization/infrastructure/events/sent-event.repository';
+import { ParticipantRepository } from './organization/domain/repository/participant.repository';
+import { EventStoreRepository } from './organization/infrastructure/events/event-store.repository';
 import { TypeormOrganizationRepository } from './organization/infrastructure/repository/typeorm.organization.repository';
 import { TypeormParticipantRepository } from './organization/infrastructure/repository/typeorm.participant-repository';
-import { TypeormSentEventRepository } from './organization/infrastructure/repository/typeorm.sent-event.repository';
 import { Config } from './shared/config/config';
+import { CommandBus } from './shared/events/command-bus';
+import { CommandHandler } from './shared/events/command-handler';
+import { CommandHandlerMetadataStorage } from './shared/events/command-handler.decorator';
 import { EventHandler } from './shared/events/event-handler';
 import { EventPublisher } from './shared/events/event-publisher';
 import {
   EventHandlersMetadataStorage,
   GlobalEventHandlersMetadataStorage,
 } from './shared/events/handle-event.decorator';
+import { QueryBus } from './shared/events/query-bus';
+import { QueryHandler } from './shared/events/query-handler';
+import { QueryHandlerMetadataStorage } from './shared/events/query-handler.decorator';
 import { AxiosHttpClient } from './shared/http-client/axios.http-client';
 import { HttpClient } from './shared/http-client/http-client';
 import { ConsoleLogLogger, Logger } from './shared/logger';
-import { PubSubQueue } from './shared/queue/pub-sub-queue';
-import { RegularQueue } from './shared/queue/regular-queue';
 
 export const container = new InversifyJSContainer({
   defaultScope: 'Singleton',
@@ -57,34 +58,6 @@ container
 
 container.bind(CreateOrganizationCommandHandler).to(CreateOrganizationCommandHandler).inSingletonScope();
 
-container.bind(EventPubSubQueueInjectToken).toDynamicValue(({ container: contextContainer }) => {
-  const { rabbit } = contextContainer.get(Config);
-
-  return new PubSubQueue(
-    {
-      password: rabbit.password,
-      queueName: 'pub-sub-event',
-      username: rabbit.username,
-      host: rabbit.host,
-    },
-    contextContainer.get(Logger)
-  );
-});
-
-container.bind(EventPublishedQueueInjectToken).toDynamicValue(({ container: contextContainer }) => {
-  const { rabbit } = contextContainer.get(Config);
-
-  return new RegularQueue(
-    {
-      password: rabbit.password,
-      queueName: 'events',
-      username: rabbit.username,
-      host: rabbit.host,
-    },
-    contextContainer.get(Logger)
-  );
-});
-
 container.bind(EventPublisher).toDynamicValue(({ container: contextContainer }) => {
   const eventHandlers = new Map<string, EventHandler<any>[]>();
 
@@ -104,13 +77,36 @@ container.bind(EventPublisher).toDynamicValue(({ container: contextContainer }) 
   return new EventPublisher(eventHandlers, contextContainer.get(Logger), globalEventHandlers);
 });
 
-container.bind(SentEventRepository).to(TypeormSentEventRepository).inSingletonScope();
 container.bind(CreateParticipantCommandHandler).to(CreateParticipantCommandHandler).inSingletonScope();
 container
   .bind(ParticipantRepository)
   .toDynamicValue(() => new TypeormParticipantRepository())
   .inSingletonScope();
 container.bind(OrganizationService).to(InternalOrganizationService).inSingletonScope();
-container.bind(PublishEventToQueueHandler).to(PublishEventToQueueHandler).inSingletonScope();
+
+container
+  .bind(EventStoreRepository)
+  .toDynamicValue(() => new EventStoreRepository())
+  .inSingletonScope();
+
+container.bind(CommandBus).toDynamicValue(({ container: contextContainer }) => {
+  const commandHandlers: Map<string, CommandHandler<any>> = new Map();
+
+  for (const [command, handlerToken] of CommandHandlerMetadataStorage.entries()) {
+    commandHandlers.set(command, contextContainer.get(handlerToken));
+  }
+
+  return new CommandBus(commandHandlers);
+});
+
+container.bind(QueryBus).toDynamicValue(({ container: contextContainer }) => {
+  const queryHandlers: Map<string, QueryHandler<any, any>> = new Map();
+
+  for (const [command, handlerToken] of QueryHandlerMetadataStorage.entries()) {
+    queryHandlers.set(command, contextContainer.get(handlerToken));
+  }
+
+  return new QueryBus(queryHandlers);
+});
 
 export default container;

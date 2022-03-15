@@ -1,16 +1,20 @@
-import { getConnection, getRepository, QueryRunner } from 'typeorm';
-import { OrganizationWritableConnection } from '../database/organization-database.config';
-import { SentEvent } from '../../domain/event/sent-event';
+import { getConnection, QueryRunner } from 'typeorm';
+import { DomainEvent } from '../../../shared/events/domain-event';
+import { OrganizationConnection } from '../database/organization-database.config';
+import { EventStoreRepository } from './event-store.repository';
 
 export class UnitOfWork {
   static create(): UnitOfWork {
-    return new UnitOfWork(getConnection(OrganizationWritableConnection).createQueryRunner());
+    const qr = getConnection(OrganizationConnection).createQueryRunner();
+
+    return new UnitOfWork(qr, new EventStoreRepository(qr));
   }
 
-  private readonly sentEventsToInsert: SentEvent[] = [];
-  constructor(private readonly queryRunner: QueryRunner) {}
+  private readonly sentEventsToInsert: DomainEvent[] = [];
 
-  saveSentEvent(entity: SentEvent) {
+  constructor(private readonly queryRunner: QueryRunner, private readonly eventStoreRepository: EventStoreRepository) {}
+
+  addEvent(entity: DomainEvent) {
     this.sentEventsToInsert.push(entity);
   }
 
@@ -19,7 +23,7 @@ export class UnitOfWork {
   }
 
   async persist(): Promise<void> {
-    await getRepository(SentEvent, OrganizationWritableConnection).save(this.sentEventsToInsert);
+    await this.eventStoreRepository.add(this.sentEventsToInsert);
   }
 
   async commitTransaction(): Promise<void> {

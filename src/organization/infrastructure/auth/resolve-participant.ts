@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import container from '../../../container';
 import { JwtUser } from '../../../shared/auth/jwt';
 import { ParticipantException } from '../../domain/exception/participant-exception';
-import { ParticipantRepository } from '../../domain/repository/participant-repository';
+import { ParticipantRepository } from '../../domain/repository/participant.repository';
 
 export function ResolveParticipant() {
   return async (req: Request, res: Response, next: NextFunction) => {

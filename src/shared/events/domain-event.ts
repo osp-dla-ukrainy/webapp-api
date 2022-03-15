@@ -1,5 +1,4 @@
-export abstract class DomainEvent<TEntityState> {
+export abstract class DomainEvent {
+  abstract readonly entity: string;
   readonly createdAt: Date = new Date();
-
-  abstract apply(state: TEntityState): void;
 }

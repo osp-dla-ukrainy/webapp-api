@@ -1,16 +1,14 @@
 import { DomainEvent } from './domain-event';
 import { EventPublisher } from './event-publisher';
 
-export abstract class RootAggregate<TCurrentState> {
-  abstract readonly currentState: TCurrentState;
-  private readonly _events: Array<DomainEvent<TCurrentState>> = [];
+export abstract class RootAggregate {
+  private readonly _events: Array<DomainEvent> = [];
   private readonly eventPublisher: EventPublisher;
   get events() {
     return this._events;
   }
 
-  apply(event: DomainEvent<TCurrentState>) {
-    event.apply(this.currentState);
+  apply(event: DomainEvent) {
     this._events.push(event);
   }
 

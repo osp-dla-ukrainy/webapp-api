@@ -1,21 +1,15 @@
-import { Type } from 'class-transformer';
 import { DomainEvent } from '../../../shared/events/domain-event';
-import { OrganizationCurrentState } from '../entity/organization-current-state';
+import { Organization } from '../entity/organization';
 import { Participant } from '../entity/participant';
 import { OrganizationId } from '../value-object/organization-id';
 
-export class ChangeOrganizationOwner extends DomainEvent<OrganizationCurrentState> {
-  @Type(() => OrganizationId)
+export class ChangeOrganizationOwner extends DomainEvent {
   readonly organizationId: OrganizationId;
-  @Type(() => Participant)
   readonly owner: Participant;
+  readonly entity: string = Organization.name;
 
   constructor(partial: Partial<ChangeOrganizationOwner>) {
     super();
     Object.assign(this, partial);
-  }
-
-  apply(state: OrganizationCurrentState): void {
-    state.owner = this.owner;
   }
 }
