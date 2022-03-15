@@ -38,7 +38,7 @@ export class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
       throw OrganizationException.createParticipantHasAlreadyOrganization();
     }
 
-    const newOrganization = Organization.create({
+    const newOrganization = Organization.createEntity({
       organizationId,
       owner: participant,
     });

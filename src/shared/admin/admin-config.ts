@@ -6,6 +6,10 @@ import session from 'express-session';
 import { Connection } from 'typeorm';
 import { v4 } from 'uuid';
 import container from '../../container';
+import {
+  OrganizationConnection,
+  OrganizationEntities,
+} from '../../organization/infrastructure/database/organization-database.config';
 import { Config } from '../config/config';
 import {
   IdentityConnectionName,
@@ -24,11 +28,13 @@ export function bootstrapAdmin(connections: Connection[]) {
   });
 
   const identityDbConnection = connections.find((conn) => conn.name === IdentityConnectionName);
+  const organizationDbConnection = connections.find((conn) => conn.name === OrganizationConnection);
 
   IdentityEntities.forEach((entity) => entity.useConnection(identityDbConnection));
+  OrganizationEntities.forEach((entity) => entity.useConnection(organizationDbConnection));
 
   const adminJs = new AdminJS({
-    databases: [identityDbConnection],
+    databases: [identityDbConnection, organizationDbConnection],
     resources: [],
     rootPath: '/admin',
   });

@@ -4,7 +4,7 @@ import { HttpException, HttpExceptionConstructor } from '../../../shared/excepti
 export class ParticipantException extends HttpException {
   static createDoesNotFound(): ParticipantException {
     return new ParticipantException({
-      message: 'Participant does not exist for logged user',
+      details: { message: `Participant does not exist for logged user` },
       status: StatusCodes.NOT_FOUND,
     } as HttpExceptionConstructor);
   }

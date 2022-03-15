@@ -1,7 +1,8 @@
+import { BaseEntity } from 'typeorm';
 import { DomainEvent } from './domain-event';
 import { EventPublisher } from './event-publisher';
 
-export abstract class RootAggregate {
+export abstract class RootAggregate extends BaseEntity {
   private readonly _events: Array<DomainEvent> = [];
   private readonly eventPublisher: EventPublisher;
   get events() {

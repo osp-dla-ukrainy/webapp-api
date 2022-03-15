@@ -17,7 +17,7 @@ export class CreateParticipantCommandHandler implements CommandHandler<CreatePar
   ) {}
 
   async execute({ participantId, userId }: CreateParticipantCommand): Promise<void> {
-    const newOwner = Participant.create({
+    const newOwner = Participant.createEntity({
       id: participantId,
       userId,
     });
