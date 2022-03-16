@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { Integrations as TracingIntegrations } from '@sentry/tracing';
-import express from 'express';
+import cors from 'cors';
+import express, { json } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import morgan from 'morgan';
 import container from './container';
@@ -15,6 +16,14 @@ const logger = container.get(Logger);
 export const app = express();
 
 app.set('trust proxy', 1);
+
+app.use(
+  cors({
+    origin: config.app.cors,
+  })
+);
+
+app.use(json());
 
 Sentry.init({
   environment: config.app.env,

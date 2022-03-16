@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { User } from '../../identity/domain/entity/user';
 import { AuthException } from '../exception/auth.exception';
 

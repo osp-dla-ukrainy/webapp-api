@@ -1,21 +1,41 @@
 import { getConnection, QueryRunner } from 'typeorm';
-import { DomainEvent } from '../../../shared/events/domain-event';
+import { Organization } from '../../domain/entity/organization';
+import { Participant } from '../../domain/entity/participant';
+import { OrganizationRepository } from '../../domain/repository/organization.repository';
+import { ParticipantRepository } from '../../domain/repository/participant.repository';
 import { OrganizationConnection } from '../database/organization-database.config';
+import { TypeormOrganizationRepository } from '../repository/typeorm.organization.repository';
+import { TypeormParticipantRepository } from '../repository/typeorm.participant-repository';
 import { EventStoreRepository } from './event-store.repository';
 
 export class UnitOfWork {
   static create(): UnitOfWork {
     const qr = getConnection(OrganizationConnection).createQueryRunner();
 
-    return new UnitOfWork(qr, new EventStoreRepository(qr));
+    return new UnitOfWork(
+      qr,
+      new TypeormOrganizationRepository(qr),
+      new TypeormParticipantRepository(qr),
+      new EventStoreRepository(qr)
+    );
   }
 
-  private readonly sentEventsToInsert: DomainEvent[] = [];
+  private organizations: Organization[] = [];
+  private participants: Participant[] = [];
 
-  constructor(private readonly queryRunner: QueryRunner, private readonly eventStoreRepository: EventStoreRepository) {}
+  constructor(
+    private readonly queryRunner: QueryRunner,
+    readonly organizationRepository: OrganizationRepository,
+    readonly participantRepository: ParticipantRepository,
+    readonly eventStoreRepository: EventStoreRepository
+  ) {}
 
-  addEvent(entity: DomainEvent) {
-    this.sentEventsToInsert.push(entity);
+  saveOrganization(entity: Organization) {
+    this.organizations.push(entity);
+  }
+
+  saveParticipant(entity: Participant) {
+    this.participants.push(entity);
   }
 
   async startTransaction(): Promise<void> {
@@ -23,16 +43,30 @@ export class UnitOfWork {
   }
 
   async persist(): Promise<void> {
-    await this.eventStoreRepository.add(this.sentEventsToInsert);
+    await Promise.all(this.organizations.map((organization) => this.organizationRepository.save(organization)));
+    await Promise.all(this.participants.map((organization) => this.participantRepository.save(organization)));
+    const organizationEvents = this.organizations.flatMap((org) => org.events);
+    const participantEvents = this.participants.flatMap((org) => org.events);
+
+    await this.eventStoreRepository.add([...participantEvents, ...organizationEvents]);
+
+    this.organizations = [];
+    this.participants = [];
   }
 
   async commitTransaction(): Promise<void> {
-    await this.queryRunner.commitTransaction();
-    await this.queryRunner.release();
+    try {
+      await this.queryRunner.commitTransaction();
+    } finally {
+      await this.queryRunner.release();
+    }
   }
 
   async rollbackTransaction(): Promise<void> {
-    await this.queryRunner.rollbackTransaction();
-    await this.queryRunner.release();
+    try {
+      await this.queryRunner.rollbackTransaction();
+    } finally {
+      await this.queryRunner.release();
+    }
   }
 }

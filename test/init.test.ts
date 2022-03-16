@@ -7,6 +7,8 @@ import { FacebookProfile } from '../src/identity/domain/entity/facebook-profile'
 import { User } from '../src/identity/domain/entity/user';
 import { Organization } from '../src/organization/domain/entity/organization';
 import { Participant } from '../src/organization/domain/entity/participant';
+import { GeolocationResolverService } from '../src/organization/domain/service/geolocation-resolver.service';
+import { EventStore } from '../src/organization/infrastructure/events/event.store';
 import { app } from '../src/server';
 import container from '../src/container';
 import { FacebookApiService } from '../src/identity/domain/service/facebook-api.service';
@@ -75,6 +77,10 @@ export async function initTestApp() {
     getUserData: jest.fn,
   } as unknown as FacebookApiService);
 
+  container.rebind(GeolocationResolverService).toConstantValue({
+    getCoords: jest.fn(),
+  });
+
   await createDatabaseConnection();
 
   return app;
@@ -83,6 +89,7 @@ export async function initTestApp() {
 export async function clearSchema() {
   await getRepository(Organization, OrganizationConnection).createQueryBuilder().delete().execute();
   await getRepository(Participant, OrganizationConnection).createQueryBuilder().delete().execute();
+  await getRepository(EventStore, OrganizationConnection).createQueryBuilder().delete().execute();
   await getRepository(User, IdentityConnectionName).createQueryBuilder().delete().execute();
   await getRepository(FacebookProfile, IdentityConnectionName).createQueryBuilder().delete().execute();
 }

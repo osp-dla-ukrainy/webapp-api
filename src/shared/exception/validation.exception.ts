@@ -7,7 +7,7 @@ import { HttpException, HttpExceptionConstructor } from './http.exception';
 export class ValidationException extends HttpException {
   static createRequestValidationException(errors: ExpressValidatorError[]) {
     return new ValidationException({
-      status: StatusCodes.BAD_REQUEST,
+      status: StatusCodes.UNPROCESSABLE_ENTITY,
       details: {
         message: 'Request validation failed',
         errors,

@@ -9,7 +9,8 @@ import { CreateOrganizationCommandHandler } from './organization/application/com
 import { CreateParticipantCommandHandler } from './organization/application/command/create-participant.command-handler';
 import { OrganizationRepository } from './organization/domain/repository/organization.repository';
 import { ParticipantRepository } from './organization/domain/repository/participant.repository';
-import { EventStoreRepository } from './organization/infrastructure/events/event-store.repository';
+import { GeolocationResolverService } from './organization/domain/service/geolocation-resolver.service';
+import { OngeoGeolocationResolverService } from './organization/infrastructure/geolocation/ongeo.geolocation-resolver.service';
 import { TypeormOrganizationRepository } from './organization/infrastructure/repository/typeorm.organization.repository';
 import { TypeormParticipantRepository } from './organization/infrastructure/repository/typeorm.participant-repository';
 import { Config } from './shared/config/config';
@@ -84,11 +85,6 @@ container
   .inSingletonScope();
 container.bind(OrganizationService).to(InternalOrganizationService).inSingletonScope();
 
-container
-  .bind(EventStoreRepository)
-  .toDynamicValue(() => new EventStoreRepository())
-  .inSingletonScope();
-
 container.bind(CommandBus).toDynamicValue(({ container: contextContainer }) => {
   const commandHandlers: Map<string, CommandHandler<any>> = new Map();
 
@@ -108,5 +104,7 @@ container.bind(QueryBus).toDynamicValue(({ container: contextContainer }) => {
 
   return new QueryBus(queryHandlers);
 });
+
+container.bind(GeolocationResolverService).to(OngeoGeolocationResolverService).inSingletonScope();
 
 export default container;
