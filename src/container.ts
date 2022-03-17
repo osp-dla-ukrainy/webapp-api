@@ -7,12 +7,16 @@ import { TypeOrmUserRepository } from './identity/infrastructure/repository/type
 import { AuthController } from './identity/ui/auth.controller';
 import { CreateOrganizationCommandHandler } from './organization/application/command/create-organization.command-handler';
 import { CreateParticipantCommandHandler } from './organization/application/command/create-participant.command-handler';
+import { GetOrganizationsByQueryQuery } from './organization/application/query/get-organizations-by-query-query.handler';
+import { AvailableQualificationRepository } from './organization/domain/repository/available-qualification.repository';
 import { OrganizationRepository } from './organization/domain/repository/organization.repository';
 import { ParticipantRepository } from './organization/domain/repository/participant.repository';
 import { GeolocationResolverService } from './organization/domain/service/geolocation-resolver.service';
 import { OngeoGeolocationResolverService } from './organization/infrastructure/geolocation/ongeo.geolocation-resolver.service';
+import { TypeormAvailableQualificationRepository } from './organization/infrastructure/repository/typeorm.available-qualification.repository';
 import { TypeormOrganizationRepository } from './organization/infrastructure/repository/typeorm.organization.repository';
 import { TypeormParticipantRepository } from './organization/infrastructure/repository/typeorm.participant-repository';
+import { OrganizationResponseSerializer } from './organization/ui/rest/organization.response-serializer';
 import { Config } from './shared/config/config';
 import { CommandBus } from './shared/events/command-bus';
 import { CommandHandler } from './shared/events/command-handler';
@@ -106,5 +110,12 @@ container.bind(QueryBus).toDynamicValue(({ container: contextContainer }) => {
 });
 
 container.bind(GeolocationResolverService).to(OngeoGeolocationResolverService).inSingletonScope();
+
+container.bind(GetOrganizationsByQueryQuery).to(GetOrganizationsByQueryQuery).inSingletonScope();
+container.bind(OrganizationResponseSerializer).to(OrganizationResponseSerializer).inSingletonScope();
+container
+  .bind(AvailableQualificationRepository)
+  .toDynamicValue(() => new TypeormAvailableQualificationRepository())
+  .inSingletonScope();
 
 export default container;

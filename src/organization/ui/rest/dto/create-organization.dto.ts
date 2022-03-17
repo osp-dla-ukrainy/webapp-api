@@ -9,4 +9,9 @@ export class CreateOrganizationRequestDto {
     readonly postcode: string;
   };
   readonly organizationType: OrganizationType;
+  readonly contact: {
+    readonly phone: string;
+  };
+  readonly name: string;
+  readonly qualifications: string[];
 }

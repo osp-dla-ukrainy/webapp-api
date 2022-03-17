@@ -2,7 +2,7 @@ import { ClassConstructor } from 'class-transformer';
 import { injectable } from 'inversify';
 import { getRepository, QueryRunner, Repository } from 'typeorm';
 import { nameofWithAlias } from '../../../shared/utils/nameof';
-import { Participant } from '../../domain/entity/participant';
+import { Participant } from '../../domain/entity/participant.entity';
 import { ParticipantRepository } from '../../domain/repository/participant.repository';
 import { ParticipantId } from '../../domain/value-object/participant-id';
 import { OrganizationConnection } from '../database/organization-database.config';

@@ -4,7 +4,7 @@ import { RegisterCommandHandler } from '../../../shared/events/command-handler.d
 import { EventPublisher } from '../../../shared/events/event-publisher';
 import { ParticipantException } from '../../domain/exception/participant-exception';
 import { ParticipantId } from '../../domain/value-object/participant-id';
-import { Participant } from '../../domain/entity/participant';
+import { Participant } from '../../domain/entity/participant.entity';
 import { ParticipantRepository } from '../../domain/repository/participant.repository';
 import { UnitOfWork } from '../../infrastructure/events/unit-of-work';
 

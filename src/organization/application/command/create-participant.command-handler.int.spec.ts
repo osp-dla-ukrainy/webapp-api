@@ -4,7 +4,7 @@ import { clearSchema, initTestApp } from '../../../../test/init.test';
 import { saveParticipant } from '../../../../test/organization.test';
 import container from '../../../container';
 import { CommandBus } from '../../../shared/events/command-bus';
-import { Participant } from '../../domain/entity/participant';
+import { Participant } from '../../domain/entity/participant.entity';
 import { ParticipantCreated } from '../../domain/event/participant-created';
 import { ParticipantException } from '../../domain/exception/participant-exception';
 import { ParticipantId } from '../../domain/value-object/participant-id';

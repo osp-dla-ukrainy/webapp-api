@@ -1,10 +1,11 @@
 import * as faker from 'faker';
 import { getRepository } from 'typeorm';
 import { v4 } from 'uuid';
+import { Contact } from '../src/organization/domain/value-object/contact.entity';
 import { Geolocation } from '../src/organization/domain/value-object/geolocation';
-import { Organization } from '../src/organization/domain/entity/organization';
-import { Participant } from '../src/organization/domain/entity/participant';
-import { Location } from '../src/organization/domain/value-object/location';
+import { Organization } from '../src/organization/domain/entity/organization.entity';
+import { Participant } from '../src/organization/domain/entity/participant.entity';
+import { Location } from '../src/organization/domain/value-object/location.entity';
 import { OrganizationId } from '../src/organization/domain/value-object/organization-id';
 import { OrganizationType } from '../src/organization/domain/value-object/organization-type';
 import { ParticipantId } from '../src/organization/domain/value-object/participant-id';
@@ -29,7 +30,6 @@ export async function saveOrganization(opts?: Partial<Organization>): Promise<Or
       id: OrganizationId.create(),
       type: faker.random.arrayElement([OrganizationType.Ordinary, OrganizationType.SinglePerson]),
       owner,
-      ...opts,
       location: await getRepository(Location, OrganizationConnection).save(
         new Location({
           city: faker.address.city(),
@@ -43,6 +43,13 @@ export async function saveOrganization(opts?: Partial<Organization>): Promise<Or
           }),
         })
       ),
+      contact: await getRepository(Contact, OrganizationConnection).save(
+        new Contact({
+          phone: '+48123123123',
+        })
+      ),
+      name: faker.random.word(),
+      ...opts,
     })
   );
 }

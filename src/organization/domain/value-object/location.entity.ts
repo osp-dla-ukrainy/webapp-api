@@ -1,5 +1,6 @@
-import { IsPostalCode, IsString, ValidateNested } from 'class-validator';
+import { IsPostalCode, IsString, Matches, ValidateNested } from 'class-validator';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { NAME_REGEXP } from '../../infrastructure/validator/regexp';
 import { GeolocationResolverService } from '../service/geolocation-resolver.service';
 import { Geolocation } from './geolocation';
 
@@ -32,19 +33,23 @@ export class Location extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'location_id' })
   private id: string;
 
+  @Matches(NAME_REGEXP)
   @Column()
   city: string;
 
+  @Matches(NAME_REGEXP)
   @Column()
   province: string;
 
+  @Matches(NAME_REGEXP)
   @Column()
   municipality: string;
 
-  @IsPostalCode()
+  @IsPostalCode('PL')
   @Column()
   postcode: string;
 
+  @Matches(NAME_REGEXP)
   @IsString()
   @Column()
   state: string;

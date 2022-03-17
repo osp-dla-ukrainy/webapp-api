@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { Participant } from '../entity/participant';
+import { Participant } from '../entity/participant.entity';
 import { ParticipantId } from '../value-object/participant-id';
 
 @injectable()

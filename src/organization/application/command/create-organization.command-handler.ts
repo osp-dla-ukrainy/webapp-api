@@ -3,16 +3,18 @@ import { Command } from '../../../shared/events/command';
 import { CommandHandler } from '../../../shared/events/command-handler';
 import { RegisterCommandHandler } from '../../../shared/events/command-handler.decorator';
 import { EventPublisher } from '../../../shared/events/event-publisher';
-import { Organization } from '../../domain/entity/organization';
+import { Organization } from '../../domain/entity/organization.entity';
 import { OrganizationException } from '../../domain/exception/organization-exception';
 import { ParticipantException } from '../../domain/exception/participant-exception';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
 import { ParticipantRepository } from '../../domain/repository/participant.repository';
 import { GeolocationResolverService } from '../../domain/service/geolocation-resolver.service';
-import { Location } from '../../domain/value-object/location';
+import { Contact } from '../../domain/value-object/contact.entity';
+import { Location } from '../../domain/value-object/location.entity';
 import { OrganizationId } from '../../domain/value-object/organization-id';
 import { OrganizationType } from '../../domain/value-object/organization-type';
 import { ParticipantId } from '../../domain/value-object/participant-id';
+import { Qualification } from '../../domain/value-object/qualifications.entity';
 import { UnitOfWork } from '../../infrastructure/events/unit-of-work';
 
 export class CreateOrganizationCommand extends Command<CreateOrganizationCommand> {
@@ -26,6 +28,11 @@ export class CreateOrganizationCommand extends Command<CreateOrganizationCommand
     readonly postcode: string;
   };
   readonly organizationType: OrganizationType;
+  readonly contact: {
+    readonly phone: string;
+  };
+  readonly name: string;
+  readonly qualifications: string[];
 }
 
 @RegisterCommandHandler(CreateOrganizationCommand)
@@ -49,10 +56,17 @@ export class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
         throw ParticipantException.createDoesNotFound();
       }
 
-      const organization = await uow.organizationRepository.findOneByOwner(participant.id);
+      const [organization, organizationWithThisSameName] = await Promise.all([
+        uow.organizationRepository.findOneByOwner(participant.id),
+        uow.organizationRepository.findOneByName(command.name),
+      ]);
 
       if (organization) {
         throw OrganizationException.createParticipantHasAlreadyOrganization();
+      }
+
+      if (organizationWithThisSameName) {
+        throw OrganizationException.createOrganizationExistsWithGivenName();
       }
 
       const { location } = command;
@@ -68,7 +82,12 @@ export class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
           state: location.state,
           geolocationResolverService: this.geolocationResolverService,
         }),
+        contact: Contact.createEntity({ phone: command.contact.phone }),
+        name: command.name,
+        qualifications: command.qualifications.map((q) => Qualification.createEntity({ name: q })),
       });
+
+      await newOrganization.validate();
 
       this.eventPublisher.mergeContext(newOrganization);
 

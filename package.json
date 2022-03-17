@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "test": "jest --runInBand --detectOpenHandles",
     "build": "rm -rf dist && tsc",
     "build:watch": "rm -rf dist && tsc",
     "start": "node dist/index.js",

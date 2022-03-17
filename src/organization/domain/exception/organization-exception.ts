@@ -8,4 +8,11 @@ export class OrganizationException extends HttpException {
       status: StatusCodes.BAD_REQUEST,
     });
   }
+
+  static createOrganizationExistsWithGivenName() {
+    return new OrganizationException({
+      details: { message: 'Organization exist with given name' },
+      status: StatusCodes.BAD_REQUEST,
+    });
+  }
 }
