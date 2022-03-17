@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { matchedData } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import container from '../../../container';
 import { AuthMiddleware } from '../../../shared/auth/auth-middleware';
@@ -8,18 +9,23 @@ import { Participant } from '../../domain/entity/participant';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
 import { OrganizationId } from '../../domain/value-object/organization-id';
 import { ResolveParticipant } from '../../infrastructure/auth/resolve-participant';
+import { CreateOrganizationRequestDto } from './dto/create-organization.dto';
+import { OrganizationRequestValidator } from './organization.request-validator';
 
 export class OrganizationController {
   static async create(req: Request, res: Response) {
     const { participant } = res.locals as { participant: Participant };
     const commandBus = container.get(CommandBus);
 
+    const dto = matchedData(req) as CreateOrganizationRequestDto;
     const organizationId = OrganizationId.create();
 
     await commandBus.handle(
       new CreateOrganizationCommand({
         organizationId,
         participantId: participant.id,
+        location: dto.location,
+        organizationType: dto.organizationType,
       })
     );
 
@@ -49,7 +55,13 @@ export class OrganizationController {
 export function getOrganizationRoutes() {
   const router = Router();
 
-  router.post('/', AuthMiddleware, ResolveParticipant(), OrganizationController.create);
+  router.post(
+    '/',
+    OrganizationRequestValidator.create,
+    AuthMiddleware,
+    ResolveParticipant(),
+    OrganizationController.create
+  );
   router.get('/me', AuthMiddleware, ResolveParticipant(), OrganizationController.me);
   router.get('/:id', OrganizationController.getOne);
 

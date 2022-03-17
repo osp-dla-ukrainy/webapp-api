@@ -9,6 +9,13 @@ export class ParticipantException extends HttpException {
     } as HttpExceptionConstructor);
   }
 
+  static createParticipantAlreadyExists(): ParticipantException {
+    return new ParticipantException({
+      details: { message: `Participant already exist for this user` },
+      status: StatusCodes.BAD_REQUEST,
+    } as HttpExceptionConstructor);
+  }
+
   constructor(data: HttpExceptionConstructor) {
     super(data);
   }

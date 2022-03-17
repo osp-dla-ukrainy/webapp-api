@@ -26,6 +26,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "amqplib": "^0.8.0",
     "@adminjs/express": "^4.1.0",
     "@adminjs/typeorm": "^2.0.2",
@@ -53,6 +54,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/amqplib": "^0.8.2",
     "@types/supertest": "^2.0.11",
     "supertest": "^6.2.2",

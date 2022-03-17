@@ -2,7 +2,7 @@ import AdminJSExpress from '@adminjs/express';
 import { Database, Resource } from '@adminjs/typeorm';
 import { validate } from 'class-validator';
 import { Router } from 'express';
-import session from 'express-session';
+import * as session from 'express-session';
 import { Connection } from 'typeorm';
 import { v4 } from 'uuid';
 import container from '../../container';

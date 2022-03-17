@@ -1,5 +1,5 @@
 import { plainToInstance, Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsString, validate, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString, validate, ValidateNested } from 'class-validator';
 import { config as dotenvConfig } from 'dotenv';
 import { StatusCodes } from 'http-status-codes';
 import { HttpException } from '../exception/http.exception';
@@ -52,6 +52,8 @@ class AppConfig {
   readonly port: number;
   @IsEnum(AppEnv)
   readonly env: AppEnv;
+  @IsNotEmpty()
+  readonly cors: string | RegExp;
 }
 
 class DatabaseConfig {
@@ -83,6 +85,11 @@ class RabbitConfig {
   readonly password: string;
 }
 
+class OngeoConfig {
+  @IsString()
+  readonly apiKey: string;
+}
+
 export class Config {
   static load() {
     const frontendBaseUrl = process.env.FRONTEND_BASE_URL;
@@ -105,6 +112,7 @@ export class Config {
       app: {
         port: Number(process.env.PORT),
         env: process.env.NODE_ENV?.toLowerCase() as AppEnv,
+        cors: new RegExp(process.env.CORS_REGEXP),
       },
       database: {
         host: process.env.DATABASE_HOST,
@@ -125,6 +133,9 @@ export class Config {
         host: process.env.RABBIT_HOST,
         username: process.env.RABBIT_USERNAME,
         password: process.env.RABBIT_PASSWORD,
+      },
+      ongeo: {
+        apiKey: process.env.ONGEO_API_KEY,
       },
     } as Config);
   }
@@ -160,6 +171,10 @@ export class Config {
   @ValidateNested()
   @Type(() => RabbitConfig)
   readonly rabbit: RabbitConfig;
+
+  @ValidateNested()
+  @Type(() => OngeoConfig)
+  readonly ongeo: OngeoConfig;
 
   constructor(partial: Config) {
     Object.assign(this, partial);

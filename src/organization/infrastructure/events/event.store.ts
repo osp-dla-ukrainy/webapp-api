@@ -3,6 +3,19 @@ import { DomainEvent } from '../../../shared/events/domain-event';
 
 @Entity()
 export class EventStore<TData extends DomainEvent> extends BaseEntity {
+  static createFromDomainEvent(domainEvent: DomainEvent | DomainEvent[]): EventStore<any>[] {
+    const domainEvents = Array.isArray(domainEvent) ? domainEvent : [domainEvent];
+
+    return domainEvents.map(
+      (e) =>
+        new EventStore({
+          data: e,
+          entity: e.entity,
+          type: e.constructor.name,
+        })
+    );
+  }
+
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
