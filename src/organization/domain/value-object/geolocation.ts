@@ -1,7 +1,7 @@
 import { IsLatitude, IsLongitude } from 'class-validator';
 import { Column } from 'typeorm';
 import { GeolocationResolverService } from '../service/geolocation-resolver.service';
-import { Location } from './location';
+import { Location } from './location.entity';
 
 export class Geolocation {
   static async createByLocation({

@@ -10,11 +10,12 @@ import { saveOrganization, saveParticipant } from '../../../../test/organization
 import { createJwtUser } from '../../../../test/user.test';
 import container from '../../../container';
 import { nameof } from '../../../shared/utils/nameof';
-import { Organization } from '../../domain/entity/organization';
-import { Participant } from '../../domain/entity/participant';
+import { Organization } from '../../domain/entity/organization.entity';
+import { Participant } from '../../domain/entity/participant.entity';
 import { OrganizationCreated } from '../../domain/event/organization-created';
 import { GeolocationResolverService } from '../../domain/service/geolocation-resolver.service';
-import { Location } from '../../domain/value-object/location';
+import { Contact } from '../../domain/value-object/contact.entity';
+import { Location } from '../../domain/value-object/location.entity';
 import { OrganizationId } from '../../domain/value-object/organization-id';
 import { OrganizationType } from '../../domain/value-object/organization-type';
 import { OrganizationConnection } from '../../infrastructure/database/organization-database.config';
@@ -51,6 +52,11 @@ describe('OrganizationController integration tests', () => {
         OrganizationType.SinglePerson,
         OrganizationType.Ordinary,
       ] as OrganizationType[]),
+      contact: {
+        phone: '+48500111111',
+      },
+      name: faker.random.word(),
+      qualifications: [],
     });
 
     const saveMocks = async () => {
@@ -105,6 +111,21 @@ describe('OrganizationController integration tests', () => {
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
     });
 
+    it('400 - when organization exists with this same name', async () => {
+      const { jwtUser } = await saveMocks();
+      const organization = await saveOrganization();
+
+      const response = await request(app)
+        .post(route)
+        .set(authHeaders(jwtUser))
+        .send({
+          ...payload,
+          name: organization.name,
+        } as CreateOrganizationRequestDto);
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
     describe('201', () => {
       it('should return organization id', async () => {
         const { jwtUser } = await saveMocks();
@@ -123,7 +144,12 @@ describe('OrganizationController integration tests', () => {
         await request(app).post(route).set(authHeaders(jwtUser)).send(payload);
 
         const result = await getRepository(Organization, OrganizationConnection).findOne({
-          relations: [nameof<Organization>((o) => o.owner), nameof<Organization>((o) => o.location)],
+          relations: [
+            nameof<Organization>((o) => o.owner),
+            nameof<Organization>((o) => o.location),
+            nameof<Organization>((o) => o.contact),
+            nameof<Organization>((o) => o.qualifications),
+          ],
         });
 
         expect(result).toMatchObject({
@@ -143,6 +169,11 @@ describe('OrganizationController integration tests', () => {
               lng: coords.lng,
             } as Geolocation,
           } as Location),
+          contact: expect.objectContaining({
+            phone: payload.contact.phone,
+          } as Contact),
+          name: payload.name,
+          qualifications: [],
         } as Organization);
       });
 
@@ -172,10 +203,25 @@ describe('OrganizationController integration tests', () => {
                 lng: coords.lng,
               } as Geolocation,
             },
+            contact: {
+              phone: payload.contact.phone,
+            },
+            name: payload.name,
+            qualifications: [],
           },
           createdAt: expect.any(Date),
         } as EventStore<OrganizationCreated>);
       });
+
+      it('should save qualifications', async () => {
+        expect(true).toBeFalsy();
+      });
+    });
+  });
+
+  describe('GET /organizations', () => {
+    it('should return one organization by name', async () => {
+      expect(true).toBeFalsy();
     });
   });
 });

@@ -1,6 +1,6 @@
 import { getConnection, QueryRunner } from 'typeorm';
-import { Organization } from '../../domain/entity/organization';
-import { Participant } from '../../domain/entity/participant';
+import { Organization } from '../../domain/entity/organization.entity';
+import { Participant } from '../../domain/entity/participant.entity';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
 import { ParticipantRepository } from '../../domain/repository/participant.repository';
 import { OrganizationConnection } from '../database/organization-database.config';

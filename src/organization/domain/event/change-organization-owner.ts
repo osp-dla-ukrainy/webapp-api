@@ -1,6 +1,6 @@
 import { DomainEvent } from '../../../shared/events/domain-event';
-import { Organization } from '../entity/organization';
-import { Participant } from '../entity/participant';
+import { Organization } from '../entity/organization.entity';
+import { Participant } from '../entity/participant.entity';
 import { OrganizationId } from '../value-object/organization-id';
 
 export class ChangeOrganizationOwner extends DomainEvent {
