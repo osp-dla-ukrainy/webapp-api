@@ -9,6 +9,7 @@ import { Location } from '../src/organization/domain/value-object/location.entit
 import { OrganizationId } from '../src/organization/domain/value-object/organization-id';
 import { OrganizationType } from '../src/organization/domain/value-object/organization-type';
 import { ParticipantId } from '../src/organization/domain/value-object/participant-id';
+import { Qualification } from '../src/organization/domain/value-object/qualifications.entity';
 import { OrganizationConnection } from '../src/organization/infrastructure/database/organization-database.config';
 
 export function saveParticipant(opts?: Partial<Participant>): Promise<Participant> {
@@ -25,7 +26,7 @@ export async function saveOrganization(opts?: Partial<Organization>): Promise<Or
   const participant = opts?.owner ?? (await saveParticipant());
   const owner = Object.assign(participant, { id: participant.id.valueOf });
 
-  return getRepository(Organization, OrganizationConnection).save(
+  const organization = await getRepository(Organization, OrganizationConnection).save(
     new Organization({
       id: OrganizationId.create(),
       type: faker.random.arrayElement([OrganizationType.Ordinary, OrganizationType.SinglePerson]),
@@ -49,7 +50,25 @@ export async function saveOrganization(opts?: Partial<Organization>): Promise<Or
         })
       ),
       name: faker.random.word(),
+      qualifications: [],
       ...opts,
     })
   );
+
+  const originalOrganizationId = organization.id;
+
+  Object.assign(organization, { id: organization.id.valueOf });
+
+  const qualification = await getRepository(Qualification, OrganizationConnection).save(
+    new Qualification({
+      organization,
+      name: faker.random.word(),
+    })
+  );
+
+  organization.qualifications.push(qualification);
+
+  Object.assign(organization, { id: originalOrganizationId });
+
+  return organization;
 }

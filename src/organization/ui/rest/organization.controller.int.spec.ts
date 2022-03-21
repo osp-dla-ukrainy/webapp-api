@@ -18,9 +18,11 @@ import { Contact } from '../../domain/value-object/contact.entity';
 import { Location } from '../../domain/value-object/location.entity';
 import { OrganizationId } from '../../domain/value-object/organization-id';
 import { OrganizationType } from '../../domain/value-object/organization-type';
+import { Qualification } from '../../domain/value-object/qualifications.entity';
 import { OrganizationConnection } from '../../infrastructure/database/organization-database.config';
 import { EventStore } from '../../infrastructure/events/event.store';
 import { CreateOrganizationRequestDto } from './dto/create-organization.dto';
+import { GetOrganizationsByQueryResponseDto } from './dto/get-organizations-by-query.response-dto';
 
 describe('OrganizationController integration tests', () => {
   let app: Application;
@@ -56,7 +58,7 @@ describe('OrganizationController integration tests', () => {
         phone: '+48500111111',
       },
       name: faker.random.word(),
-      qualifications: [],
+      qualifications: ['KPP', 'Lekarz'],
     });
 
     const saveMocks = async () => {
@@ -154,7 +156,7 @@ describe('OrganizationController integration tests', () => {
 
         expect(result).toMatchObject({
           id: expect.any(OrganizationId),
-          type: OrganizationType.Ordinary,
+          type: payload.organizationType,
           owner: expect.objectContaining({
             userId: jwtUser.id,
           } as Participant),
@@ -173,7 +175,14 @@ describe('OrganizationController integration tests', () => {
             phone: payload.contact.phone,
           } as Contact),
           name: payload.name,
-          qualifications: [],
+          qualifications: [
+            expect.objectContaining({
+              name: payload.qualifications[0],
+            } as Qualification),
+            expect.objectContaining({
+              name: payload.qualifications[1],
+            } as Qualification),
+          ],
         } as Organization);
       });
 
@@ -207,21 +216,100 @@ describe('OrganizationController integration tests', () => {
               phone: payload.contact.phone,
             },
             name: payload.name,
-            qualifications: [],
+            qualifications: [
+              expect.objectContaining({
+                name: payload.qualifications[0],
+              } as Qualification),
+              expect.objectContaining({
+                name: payload.qualifications[1],
+              } as Qualification),
+            ],
           },
           createdAt: expect.any(Date),
         } as EventStore<OrganizationCreated>);
-      });
-
-      it('should save qualifications', async () => {
-        expect(true).toBeFalsy();
       });
     });
   });
 
   describe('GET /organizations', () => {
-    it('should return one organization by name', async () => {
-      expect(true).toBeFalsy();
+    const route = composeBaseOrganizationUrl('/organizations');
+
+    const saveMocks = async (opts?: Partial<Organization>) => [
+      await saveOrganization({
+        type: OrganizationType.Ordinary,
+        ...opts,
+      }),
+      await saveOrganization({ type: OrganizationType.Ordinary }),
+      await saveOrganization({ type: OrganizationType.Ordinary }),
+      await saveOrganization({ type: OrganizationType.SinglePerson }),
+    ];
+
+    it.each([
+      {
+        query: { limit: 1 },
+        expected: 1,
+      },
+      {
+        query: { limit: 2 },
+        expected: 2,
+      },
+      {
+        query: { limit: 3 },
+        expected: 3,
+      },
+    ])('should return given limit of results', async ({ query, expected }) => {
+      await saveMocks();
+
+      const response = await request(app).get(route).query(query);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.data.length).toBe(expected);
+    });
+
+    it('should return with given name', async () => {
+      const [organization] = await saveMocks();
+
+      const response = await request(app).get(route).query({ name: organization.name });
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0]).toMatchObject({
+        name: organization.name,
+        location: {
+          city: organization.location.city,
+          province: organization.location.province,
+          municipality: organization.location.municipality,
+          postcode: organization.location.postcode,
+          state: organization.location.state,
+        },
+        contact: {
+          phone: organization.contact.phone,
+        },
+        isVerified: organization.isVerified,
+        qualifications: [organization.qualifications[0].name],
+      } as GetOrganizationsByQueryResponseDto);
+    });
+
+    it('should return only ordinary organization', async () => {
+      const organizations = await saveMocks();
+
+      const response = await request(app).get(route);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.data.length).toBe(3);
+      expect(response.body.data).toMatchObject(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: organizations[0].name,
+          } as GetOrganizationsByQueryResponseDto),
+          expect.objectContaining({
+            name: organizations[1].name,
+          } as GetOrganizationsByQueryResponseDto),
+          expect.objectContaining({
+            name: organizations[2].name,
+          } as GetOrganizationsByQueryResponseDto),
+        ])
+      );
     });
   });
 });

@@ -31,4 +31,26 @@ export class OngeoGeolocationResolverService extends GeolocationResolverService 
       lng: geolocationSearchResponse.point.coordinates[0].toString(),
     };
   }
+
+  async getPostcode(data: { city: string; province: string }): Promise<{ postcode: string }> {
+    const query = `${data.province} ${data.city}`;
+
+    const { data: response } = await this.httpClient.sendRequest<{ postalCodes: string[] }[]>({
+      url: `https://postal-code.search.api.ongeo.pl/1.0/autocomplete`,
+      method: HttpMethod.GET,
+      config: {
+        query: {
+          api_key: this.config.ongeo.apiKey,
+          query,
+          maxresults: 1,
+        },
+      },
+    });
+
+    const [{ postalCodes }] = response;
+
+    return {
+      postcode: postalCodes[0],
+    };
+  }
 }

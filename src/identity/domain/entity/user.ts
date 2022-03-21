@@ -1,4 +1,4 @@
-import { IsEmail, IsString, validate, ValidateNested } from 'class-validator';
+import { IsEmail, IsString, ValidateNested } from 'class-validator';
 import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 } from 'uuid';
 import { validateEntity } from '../../../shared/validation/validate-entity';
