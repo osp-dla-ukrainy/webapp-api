@@ -1,4 +1,5 @@
 # Logs
+*.csv
 .clinic
 logs
 *.log

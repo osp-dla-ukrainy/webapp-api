@@ -28,7 +28,13 @@ export class OrganizationRequestValidator {
 
         return uniqQualifications.every((q) => availableQualifications.includes(q));
       })
-      .customSanitizer((input) => Array.from(new Set([...input]))),
+      .customSanitizer((input) => {
+        if (Array.isArray(input)) {
+          return Array.from(new Set([...input]));
+        }
+
+        return [];
+      }),
     body('qualifications.*').trim(),
     validationMiddleware,
   ];

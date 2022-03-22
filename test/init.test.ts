@@ -79,6 +79,7 @@ export async function initTestApp() {
 
   container.rebind(GeolocationResolverService).toConstantValue({
     getCoords: jest.fn(),
+    getPostcode: jest.fn(),
   });
 
   await createDatabaseConnection();

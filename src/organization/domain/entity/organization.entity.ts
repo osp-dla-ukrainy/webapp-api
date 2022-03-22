@@ -1,17 +1,16 @@
 import { IsEnum, IsString, validate, ValidateNested } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Unique } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { IdValueTransformer } from '../../../shared/database/value-transformer/id.value-transformer';
 import { RootAggregate } from '../../../shared/events/root-aggregate';
 import { ValidationException } from '../../../shared/exception/validation.exception';
 import { OrganizationCreated } from '../event/organization-created';
+import { Contact } from '../value-object/contact.entity';
 import { Location } from '../value-object/location.entity';
 import { OrganizationId } from '../value-object/organization-id';
 import { OrganizationType } from '../value-object/organization-type';
-import { Contact } from '../value-object/contact.entity';
 import { Qualification } from '../value-object/qualifications.entity';
 import { Participant } from './participant.entity';
 
-@Unique(['name'])
 @Entity()
 export class Organization extends RootAggregate {
   static createEntity({
@@ -21,6 +20,7 @@ export class Organization extends RootAggregate {
     contact,
     name,
     qualifications,
+    type,
   }: {
     name: string;
     organizationId: OrganizationId;
@@ -28,11 +28,12 @@ export class Organization extends RootAggregate {
     location: Location;
     contact: Contact;
     qualifications: Qualification[];
+    type: OrganizationType;
   }): Organization {
     const organization = new Organization({
       id: organizationId,
       owner,
-      type: OrganizationType.Ordinary,
+      type,
       location,
       contact,
       name,

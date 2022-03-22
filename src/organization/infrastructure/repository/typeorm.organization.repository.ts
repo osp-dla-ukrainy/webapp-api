@@ -1,13 +1,14 @@
 import { ClassConstructor } from 'class-transformer';
 import { injectable } from 'inversify';
 import { getRepository, QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
-import { nameofWithAlias } from '../../../shared/utils/nameof';
+import { nameof, nameofWithAlias } from '../../../shared/utils/nameof';
 import { Organization } from '../../domain/entity/organization.entity';
 import { Participant } from '../../domain/entity/participant.entity';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
 import { Contact } from '../../domain/value-object/contact.entity';
 import { Location } from '../../domain/value-object/location.entity';
 import { OrganizationId } from '../../domain/value-object/organization-id';
+import { OrganizationType } from '../../domain/value-object/organization-type';
 import { ParticipantId } from '../../domain/value-object/participant-id';
 import { Qualification } from '../../domain/value-object/qualifications.entity';
 import { OrganizationConnection } from '../database/organization-database.config';
@@ -38,17 +39,33 @@ export class TypeormOrganizationRepository extends OrganizationRepository {
   async findByQuery({
     name,
     paginationOptions,
+    organizationTypes,
   }: {
     name?: string;
     paginationOptions: PaginationOptions;
+    organizationTypes: OrganizationType[];
   }): Promise<Organization[]> {
-    const qb = this.createQueryBuilder();
+    const qb = this.createQueryBuilder().where(
+      `${nameofWithAlias<Organization>((o) => o.type)} IN (:...organizationTypes)`,
+      { organizationTypes }
+    );
 
     if (name) {
-      qb.where(`${nameofWithAlias<Organization>((o) => o.name)} ilike :name`, { name });
+      qb.andWhere(`${nameofWithAlias<Organization>((o) => o.name)} ilike :name`, { name });
     }
 
-    return qb.offset(paginationOptions.offset).limit(paginationOptions.limit).getMany();
+    const entities = await qb
+      .select([nameofWithAlias<Organization>((o) => o.id)])
+      .offset(paginationOptions.offset)
+      .limit(paginationOptions.limit)
+      .groupBy(`${nameofWithAlias<Organization>((o) => o.id)}`)
+      .getMany();
+
+    const ids = entities.map((entity) => entity.id.valueOf);
+
+    return this.createQueryBuilder()
+      .where(`${nameofWithAlias<Organization>((o) => o.id)} IN (:...ids)`, { ids })
+      .getMany();
   }
 
   async save(entity: Organization) {

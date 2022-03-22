@@ -1,5 +1,5 @@
 import { IsString } from 'class-validator';
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { BaseEntity, Column, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Organization } from '../entity/organization.entity';
 
 @Unique(['name', 'organization'])
@@ -23,6 +23,9 @@ export class Qualification extends BaseEntity {
     onDelete: 'CASCADE',
   })
   organization: Organization;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   constructor(partial: Partial<Qualification>) {
     super();

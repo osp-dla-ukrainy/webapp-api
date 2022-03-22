@@ -85,6 +85,7 @@ export class CreateOrganizationCommandHandler implements CommandHandler<CreateOr
         contact: Contact.createEntity({ phone: command.contact.phone }),
         name: command.name,
         qualifications: command.qualifications.map((q) => Qualification.createEntity({ name: q })),
+        type: command.organizationType,
       });
 
       await newOrganization.validate();

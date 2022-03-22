@@ -3,6 +3,7 @@ import { QueryHandler } from '../../../shared/events/query-handler';
 import { RegisterQueryHandler } from '../../../shared/events/query-handler.decorator';
 import { Organization } from '../../domain/entity/organization.entity';
 import { OrganizationRepository } from '../../domain/repository/organization.repository';
+import { OrganizationType } from '../../domain/value-object/organization-type';
 import { PaginationOptions } from '../../infrastructure/repository/pagination-options';
 
 export class GetOrganizationsByQueryQuery {
@@ -29,6 +30,7 @@ export class GetOrganizationsByQueryQueryHandler
     const organizations = await this.organizationRepository.findByQuery({
       name: query.name,
       paginationOptions: query.paginationOptions,
+      organizationTypes: [OrganizationType.Ordinary],
     });
 
     return {

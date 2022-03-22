@@ -7,4 +7,6 @@ export abstract class GeolocationResolverService {
     state: string;
     municipality: string;
   }): Promise<{ lat: string; lng: string }>;
+
+  abstract getPostcode(data: { city: string; province: string }): Promise<{ postcode: string }>;
 }
