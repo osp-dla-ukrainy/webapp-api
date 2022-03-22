@@ -50,4 +50,12 @@ export class User extends BaseEntity {
   async validate() {
     await validateEntity(this);
   }
+
+  isConnectedWithFacebookProfile() {
+    return !!this.facebookProfile;
+  }
+
+  connectWithFacebook({ facebookId }: { facebookId: string }) {
+    this.facebookProfile = new FacebookProfile({ facebookId });
+  }
 }
