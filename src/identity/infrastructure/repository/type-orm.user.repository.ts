@@ -41,4 +41,13 @@ export class TypeOrmUserRepository extends UserRepository {
       await userRepo.save(user);
     });
   }
+
+  findOneByEmail({ email }: { email: string }): Promise<User | undefined> {
+    return this.repository.findOne({
+      where: {
+        email,
+      },
+      relations: [nameof<User>((u) => u.facebookProfile)],
+    });
+  }
 }

@@ -46,6 +46,15 @@ export class FacebookAuthService {
       return user;
     }
 
+    const existingUser = await this.userRepository.findOneByEmail({ email: userData.email });
+
+    if (existingUser && !existingUser.isConnectedWithFacebookProfile()) {
+      existingUser.connectWithFacebook({ facebookId: userData.id });
+      await this.userRepository.save(existingUser);
+
+      return existingUser;
+    }
+
     const newUser = User.createUserFromFacebookAuth(userData);
 
     await this.organizationService.createOwner({ userId: newUser.id });
